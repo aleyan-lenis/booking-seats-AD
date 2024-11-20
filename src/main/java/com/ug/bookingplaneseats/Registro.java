@@ -25,7 +25,7 @@ import javax.swing.JComboBox;
 
 public class Registro extends javax.swing.JFrame {
 
-    private final ArrayList<String> registros = new ArrayList<>();
+    private final ArrayList<Cliente> registros = new ArrayList<>();
     private final Asiento[] asientos = new Asiento[30];
     private final ReentrantLock mutex = new ReentrantLock();
 
@@ -50,8 +50,8 @@ private void actualizarListaRegistrados() {
     String seleccionCombo3 = (String) ComboCliente3.getSelectedItem();
 
     DefaultListModel<String> modeloLista = new DefaultListModel<>();
-    for (String registro : registros) {
-        modeloLista.addElement(registro);
+    for (Cliente cliente : registros) {
+        modeloLista.addElement(cliente.getNombre()+ "" + cliente.getApellidos());
     }
     jList1.setModel(modeloLista);
 
@@ -59,10 +59,11 @@ private void actualizarListaRegistrados() {
     DefaultComboBoxModel<String> modeloCombo2 = new DefaultComboBoxModel<>();
     DefaultComboBoxModel<String> modeloCombo3 = new DefaultComboBoxModel<>();
 
-    for (String registro : registros) {
-        modeloCombo1.addElement(registro);
-        modeloCombo2.addElement(registro);
-        modeloCombo3.addElement(registro);
+    for (Cliente cliente : registros) {
+        String clienteNombre = cliente.getNombre() + "" + cliente.getApellidos();
+        modeloCombo1.addElement(clienteNombre);
+        modeloCombo2.addElement(clienteNombre);
+        modeloCombo3.addElement(clienteNombre);
     }
 
     ComboCliente1.setModel(modeloCombo1);
@@ -784,10 +785,14 @@ private void cambiarColorAsiento(int indice, java.awt.Color color) {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-private void reservarAsiento(int asientoIndex, String cliente) throws InterruptedException {
+private void reservarAsiento(int asientoIndex, Cliente cliente) throws InterruptedException {
     mutex.lock(); // Adquirir el bloqueo
 
     try {
+        if (asientoIndex < 0 || asientoIndex >= asientos.length){
+            JOptionPane.showMessageDialog(this, "Número de asiento inválido.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         // Simular tiempo de procesamiento
         Thread.sleep((int) (Math.random() * (1000 - 100 + 1) + 100));
         if (asientos[asientoIndex].getEstado()) {
@@ -800,7 +805,7 @@ private void reservarAsiento(int asientoIndex, String cliente) throws Interrupte
         actualizarColoresAsientos();
         limpiar2Campos();
 
-       
+        JOptionPane.showMessageDialog(this, "Asiento reservado correctamente", "Exito", JOptionPane.INFORMATION_MESSAGE);
 
     } finally {
         mutex.unlock(); // Liberar el bloqueo
@@ -834,15 +839,15 @@ private void eliminarAsiento(JComboBox<String> comboBox, JTextField textField) t
             return;
         }
 
-        String clienteActual = asientos[asientoIndex].getCliente();
-        String clienteSeleccionado = comboBox.getSelectedItem().toString();
+        Cliente clienteActual = asientos[asientoIndex].getCliente();
+        Cliente clienteSeleccionado = registros.get(comboBox.getSelectedIndex());
 
-        if (!clienteActual.equals(clienteSeleccionado)) {
+        if (!clienteActual.equals(clienteSeleccionado.getNombre() + " " + clienteSeleccionado.getApellidos())) {
             JOptionPane.showMessageDialog(this, "Solo el cliente que tiene reservado el asiento puede eliminarlo.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        asientos[asientoIndex].setCliente("");
+        asientos[asientoIndex].setCliente(null);
         asientos[asientoIndex].setEstado(false);
         actualizarColoresAsientos();
 
@@ -850,6 +855,7 @@ private void eliminarAsiento(JComboBox<String> comboBox, JTextField textField) t
         textField.setText("");
          limpiar2Campos();
         comboBox.setSelectedIndex(0);
+        JOptionPane.showMessageDialog(this, "Reserva eliminada correctamente.", "Éxito", JOptionPane.INFORMATION_MESSAGE);
     } finally {
         mutex.unlock(); // Liberar el bloqueo
     }
@@ -874,7 +880,7 @@ private void BotonCambiarActionPerformed(JComboBox<String> comboBox, JTextField 
             return;
         }
 
-        asientos[asientoIndex].setCliente("");
+        asientos[asientoIndex].setCliente(null);
         asientos[asientoIndex].setEstado(false);
         actualizarColoresAsientos();
          limpiar2Campos();
@@ -888,24 +894,28 @@ private void BotonCambiarActionPerformed(JComboBox<String> comboBox, JTextField 
 
     private void BotonReservar1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BotonReservar1ActionPerformed
        
-    int asientoIndex = Integer.parseInt(TextAsiento1.getText()) - 1;
-    String cliente = ComboCliente1.getSelectedItem().toString();
+        int asientoIndex;
+        try{
+            asientoIndex = Integer.parseInt(TextAsiento1.getText()) - 1;
+        } catch (NumberFormatException e){
+            JOptionPane.showMessageDialog(this, "Ingrese un número válido para el asiento.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        int selectedIndex = ComboCliente1.getSelectedIndex();
+        if(selectedIndex < 0) {
+          JOptionPane.showMessageDialog(this, "Seleccione un cliente.", "Error", JOptionPane.ERROR_MESSAGE);
+          return;
+        }
+        
+        Cliente clienteSeleccionado = registros.get(selectedIndex); 
         try {
-            reservarAsiento(asientoIndex, cliente);
+            reservarAsiento(asientoIndex, clienteSeleccionado);
         } catch (InterruptedException ex) {
             Logger.getLogger(Registro.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }//GEN-LAST:event_BotonReservar1ActionPerformed
-
-    
-    
-    
-
-
-
-
-
 
     private void BotonEliminar1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BotonEliminar1ActionPerformed
         try {        
@@ -927,11 +937,23 @@ private void BotonCambiarActionPerformed(JComboBox<String> comboBox, JTextField 
     }//GEN-LAST:event_BotonCambiar1ActionPerformed
 
     private void BotonReservar2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BotonReservar2ActionPerformed
-        // TODO add your handling code here:
-         int asientoIndex = Integer.parseInt(TextAsiento2.getText()) - 1;
-    String cliente = ComboCliente2.getSelectedItem().toString();
+        int asientoIndex;
+        try{
+            asientoIndex = Integer.parseInt(TextAsiento2.getText()) - 1;
+        } catch (NumberFormatException e){
+            JOptionPane.showMessageDialog(this, "Ingrese un número válido para el asiento.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        int selectedIndex = ComboCliente2.getSelectedIndex();
+        if(selectedIndex < 0) {
+          JOptionPane.showMessageDialog(this, "Seleccione un cliente.", "Error", JOptionPane.ERROR_MESSAGE);
+          return;
+        }
+        
+        Cliente clienteSeleccionado = registros.get(selectedIndex); 
         try {
-            reservarAsiento(asientoIndex, cliente);
+            reservarAsiento(asientoIndex, clienteSeleccionado);
         } catch (InterruptedException ex) {
             Logger.getLogger(Registro.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -953,11 +975,23 @@ private void BotonCambiarActionPerformed(JComboBox<String> comboBox, JTextField 
     }//GEN-LAST:event_BotonCambiar2ActionPerformed
 
     private void BotonReservar3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BotonReservar3ActionPerformed
-        // TODO add your handling code here:
-         int asientoIndex = Integer.parseInt(TextAsiento3.getText()) - 1;
-    String cliente = ComboCliente3.getSelectedItem().toString();
+        int asientoIndex;
+        try{
+            asientoIndex = Integer.parseInt(TextAsiento3.getText()) - 1;
+        } catch (NumberFormatException e){
+            JOptionPane.showMessageDialog(this, "Ingrese un número válido para el asiento.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        int selectedIndex = ComboCliente3.getSelectedIndex();
+        if(selectedIndex < 0) {
+          JOptionPane.showMessageDialog(this, "Seleccione un cliente.", "Error", JOptionPane.ERROR_MESSAGE);
+          return;
+        }
+        
+        Cliente clienteSeleccionado = registros.get(selectedIndex); 
         try {
-            reservarAsiento(asientoIndex, cliente);
+            reservarAsiento(asientoIndex, clienteSeleccionado);
         } catch (InterruptedException ex) {
             Logger.getLogger(Registro.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -994,16 +1028,22 @@ private void BotonCambiarActionPerformed(JComboBox<String> comboBox, JTextField 
         return;
     }
 
-        boolean cedulaRepetida = verificarCedulaRepetida(cedula);
-    if (cedulaRepetida) {
+        //boolean cedulaRepetida = verificarCedulaRepetida(cedula);
+    /*if (verificarCedulaRepetida(cedula)) {
         JOptionPane.showMessageDialog(this, "La cédula ya está registrada.", "Error", JOptionPane.ERROR_MESSAGE);
         return;
+        }*/
+    if(verificarCedulaRepetida(cedula)){
+        JOptionPane.showMessageDialog(this, "La cédula ya está registrada", "Error",JOptionPane.ERROR_MESSAGE);
+        return;
     }
-        String registro = nombre + " - " + apellidos + " - " + cedula + " - " + direccion;
-        registros.add(registro);
-
+    
+        Cliente nuevoCliente = new Cliente(nombre, apellidos, cedula, direccion);
+        registros.add(nuevoCliente);
+        
         actualizarListaRegistrados();
-          limpiarCampos();
+        limpiarCampos();
+        JOptionPane.showMessageDialog(this, "Cliente Registrado correctamente", "Exito", JOptionPane.INFORMATION_MESSAGE);
 
             // Resto del código
 
@@ -1156,10 +1196,10 @@ private void BotonCambiarActionPerformed(JComboBox<String> comboBox, JTextField 
     }//GEN-LAST:event_Asiento29MouseEntered
 
     private boolean verificarCedulaRepetida(String cedula) {
-    for (String registro : registros) {
-        String[] campos = registro.split(" - ");
-        String cedulaRegistrada = campos[2];
-        if (cedula.equals(cedulaRegistrada)) {
+    for (Cliente cliente : registros) {
+        //String[] campos = registro.split(" - ");
+        //String cedulaRegistrada = campos[2];
+        if (cliente.getCedula().equals(cedula)) {
             return true;
         }
     }

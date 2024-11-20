@@ -9,19 +9,19 @@ package com.ug.bookingplaneseats;
  * @author Misha
  */
 public class Asiento {
-    private String cliente;
+    private Cliente cliente;
     private boolean estado;
 
     public Asiento() {
-        this.cliente = "";
+        this.cliente = null;
         this.estado = false;
     }
 
-    public String getCliente() {
+    public Cliente getCliente() {
         return cliente;
     }
 
-    public void setCliente(String cliente) {
+    public void setCliente(Cliente cliente) {
         this.cliente = cliente;
     }
 
