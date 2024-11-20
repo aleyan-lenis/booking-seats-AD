@@ -10,6 +10,8 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JTextField;
 import javax.swing.JComboBox;
 
@@ -782,10 +784,12 @@ private void cambiarColorAsiento(int indice, java.awt.Color color) {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-private void reservarAsiento(int asientoIndex, String cliente) {
+private void reservarAsiento(int asientoIndex, String cliente) throws InterruptedException {
     mutex.lock(); // Adquirir el bloqueo
 
     try {
+        // Simular tiempo de procesamiento
+        Thread.sleep((int) (Math.random() * (1000 - 100 + 1) + 100));
         if (asientos[asientoIndex].getEstado()) {
             JOptionPane.showMessageDialog(this, "El asiento ya está reservado.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
@@ -806,10 +810,12 @@ private void reservarAsiento(int asientoIndex, String cliente) {
 
 
 
-private void eliminarAsiento(JComboBox<String> comboBox, JTextField textField) {
+private void eliminarAsiento(JComboBox<String> comboBox, JTextField textField) throws InterruptedException{
     mutex.lock(); // Adquirir el bloqueo
 
     try {
+        // Simular tiempo de procesamiento
+        Thread.sleep((int) (Math.random() * (1000 - 100 + 1) + 100));
         int asientoIndex;
         try {
             asientoIndex = Integer.parseInt(textField.getText()) - 1;
@@ -884,7 +890,11 @@ private void BotonCambiarActionPerformed(JComboBox<String> comboBox, JTextField 
        
     int asientoIndex = Integer.parseInt(TextAsiento1.getText()) - 1;
     String cliente = ComboCliente1.getSelectedItem().toString();
-    reservarAsiento(asientoIndex, cliente);
+        try {
+            reservarAsiento(asientoIndex, cliente);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Registro.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
     }//GEN-LAST:event_BotonReservar1ActionPerformed
 
@@ -898,7 +908,11 @@ private void BotonCambiarActionPerformed(JComboBox<String> comboBox, JTextField 
 
 
     private void BotonEliminar1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BotonEliminar1ActionPerformed
-    eliminarAsiento(ComboCliente1, TextAsiento1);        
+        try {        
+            eliminarAsiento(ComboCliente1, TextAsiento1);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Registro.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
         
     }//GEN-LAST:event_BotonEliminar1ActionPerformed
@@ -916,12 +930,20 @@ private void BotonCambiarActionPerformed(JComboBox<String> comboBox, JTextField 
         // TODO add your handling code here:
          int asientoIndex = Integer.parseInt(TextAsiento2.getText()) - 1;
     String cliente = ComboCliente2.getSelectedItem().toString();
-    reservarAsiento(asientoIndex, cliente);
+        try {
+            reservarAsiento(asientoIndex, cliente);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Registro.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_BotonReservar2ActionPerformed
 
     private void BotonEliminar2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BotonEliminar2ActionPerformed
-        // TODO add your handling code here:
-        eliminarAsiento(ComboCliente2, TextAsiento2);
+        try {
+            // TODO add your handling code here:
+            eliminarAsiento(ComboCliente2, TextAsiento2);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Registro.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_BotonEliminar2ActionPerformed
 
     private void BotonCambiar2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BotonCambiar2ActionPerformed
@@ -934,12 +956,20 @@ private void BotonCambiarActionPerformed(JComboBox<String> comboBox, JTextField 
         // TODO add your handling code here:
          int asientoIndex = Integer.parseInt(TextAsiento3.getText()) - 1;
     String cliente = ComboCliente3.getSelectedItem().toString();
-    reservarAsiento(asientoIndex, cliente);
+        try {
+            reservarAsiento(asientoIndex, cliente);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Registro.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_BotonReservar3ActionPerformed
 
     private void BotonEliminar3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BotonEliminar3ActionPerformed
-        // TODO add your handling code here:
-        eliminarAsiento(ComboCliente3, TextAsiento3);
+        try {
+            // TODO add your handling code here:
+            eliminarAsiento(ComboCliente3, TextAsiento3);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Registro.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_BotonEliminar3ActionPerformed
 
     private void BotonCambiar3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BotonCambiar3ActionPerformed
